@@ -1,36 +1,38 @@
-// create a cached connection so that you prevent creating
-// multiple connections during development when next.js hot reloads code
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
+
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
 
 declare global {
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
+  var _mongooseCache: MongooseCache | undefined;
 }
 
-const uri = process.env.MONGODB_URI;
-const options = {};
+// reuse same global cache or itll be null by default
+const cached: MongooseCache =
+  global._mongooseCache ??
+  (global._mongooseCache = { conn: null, promise: null });
 
-if (!uri) {
-  throw new Error("Please add your Mongo URI to .env.local");
+export async function connectDB() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error("Please add your Mongo URI to env.local");
+
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(uri, {
+      dbName: "news-aggregator",
+      bufferCommands: false,
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null; // do not reuse failed promise
+    throw error;
+  }
+
+  return cached.conn;
 }
-
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === "development") {
-    // reuse promise stored on global so that hot reloads dont create
-    // new client every time
-    if (!global._mongoClientPromise) {
-        const client = new MongoClient(uri, options);
-        global._mongoClientPromise = client.connect(); // keep it on global
-    }
-    clientPromise = global._mongoClientPromise;
-} else {
-    // modules only load once in production so normal module level client is fine
-    const client = new MongoClient(uri, options);
-    clientPromise = client.connect();
-}
-
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
-export default clientPromise;
-
-
