@@ -2,7 +2,7 @@ import Parser from "rss-parser";
 import { Article } from "./types";
 
 // no of milliseconds in 48 hrs, will be used for TTL management with daily refresh cycle
-const TTL_MS = 48 * 60 * 60 * 1000; 
+const TTL_MS = 24 * 60 * 60 * 1000; 
 
 function cleanUrl(link: string): string | null {
   try {
