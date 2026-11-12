@@ -9,8 +9,8 @@ async function ArticleList() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {worldArticles.map((article) => (
-        <ArticleCard article={article} key={article.url} />
+      {worldArticles.map((cluster) => (
+        <ArticleCard cluster={cluster} key={cluster.main.url} />
       ))}
     </div>
   );

@@ -130,9 +130,9 @@ const STOP_WORDS = new Set([
   "perhaps",
   "rather",
 ]);
-const JACCARD_THRESHOLD = 0.4;
+const JACCARD_THRESHOLD = 0.2;
 
-type Cluster = {
+export type Cluster = {
   main: Article;
   tokens: Set<string>;
   articles: Article[];

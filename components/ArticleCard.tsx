@@ -4,17 +4,21 @@ import {
   CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { relativeTime } from "@/lib/utils";
+import { Cluster } from "@/lib/cluster";
 
 interface ArticleCardProps {
-  article: Article;
+  cluster: Cluster;
 }
 
-const ArticleCard = ({ article }: ArticleCardProps) => {
+const ArticleCard = ({ cluster }: ArticleCardProps) => {
+  const article: Article = cluster.main;
+  const otherArticles: Article[] = cluster.articles.slice(1);
   return (
     <Card className="max-w-sm">
       <CardHeader>
@@ -23,7 +27,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             {article.title}
           </a>
         </CardTitle>
-        <CardDescription className="flex flex-col">
+        <CardDescription>
           <span>{relativeTime(new Date(article.publishedAt))}</span>
           {/* <div>
             {article.tags.map((tag) => (
@@ -36,6 +40,19 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         </CardAction>
       </CardHeader>
       <CardContent className="line-clamp-3">{article.summary}</CardContent>
+
+      {otherArticles.length > 0 && (
+        <CardFooter className="flex flex-col">
+          <p>See similar stories covered here:</p>
+          <div>
+            {otherArticles.map((a) => (
+              <a key={a.url} href={a.url} target="_blank" rel="noopener noreference">
+                <Badge>{a.source}</Badge>
+              </a>
+            ))}
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 };
